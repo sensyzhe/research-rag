@@ -10,6 +10,7 @@ from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode,tools_condition
 from dotenv import load_dotenv
+from tools import get_retriever_tool
 
 load_dotenv()
 
@@ -21,8 +22,8 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 
-tool = TavilySearchResults(max_results=2)
-tools = [tool]
+# tool = TavilySearchResults(max_results=2)
+tools = get_retriever_tool()
 llm = ChatOpenAI(
     temperature=0.7, # 降低随机性以获得更稳定的回答
     model="glm-4",
@@ -33,12 +34,12 @@ llm_with_tools = llm.bind_tools(tools)
 
 
 def chatbot(state: State):
-    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+    return  {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 
 graph_builder.add_node("chatbot", chatbot)
 
-tool_node = ToolNode(tools=[tool])
+tool_node = ToolNode(tools=tools)
 graph_builder.add_node("tools", tool_node)
 
 graph_builder.add_conditional_edges(
@@ -66,17 +67,19 @@ def run_graph(thread_id,input):
             print(message_chunk.content, end="", flush=True)
     print("\n")
 
-while True:
-    try:
-        user_input = input("User: \n")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
-            break
 
-        run_graph(1,user_input)
-    except:
-        # fallback if input() is not available
-        user_input = "What do you know about LangGraph?"
-        print("User: " + user_input)
-        run_graph(1,user_input)
-        break
+if __name__ == "__main__":
+    while True:
+        try:
+            user_input = input("User: \n")
+            if user_input.lower() in ["quit", "exit", "q"]:
+                print("Goodbye!")
+                break
+
+            run_graph(1,user_input)
+        except:
+            # fallback if input() is not available
+            user_input = "What do you know about LangGraph?"
+            print("User: " + user_input)
+            run_graph(1,user_input)
+            break
