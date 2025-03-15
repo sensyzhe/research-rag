@@ -32,7 +32,7 @@ llm_with_tools = llm.bind_tools(tools)
 
 
 def chatbot(state: State):
-    return {"messages": [llm_with_tools.stream(state["messages"])]}
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 
 graph_builder.add_node("chatbot", chatbot)
@@ -49,16 +49,33 @@ graph_builder.set_entry_point("chatbot")
 memory = MemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
 
-config = {"configurable": {"thread_id": "1"}}
-
-user_input = "跟我介绍长沙，400字"
 
 
 # The config is the **second positional argument** to stream() or invoke()!
-events = graph.stream(
-    {"messages": [{"role": "user", "content": user_input}]},
-    config,
-    stream_mode="values",
-)
-for event in events:
-    event["messages"][-1].pretty_print()
+def run_graph(thread_id,input):
+    thread_id = str(thread_id)
+    config = {"configurable": {"thread_id": thread_id}}
+    print("Assistant: ")
+    for message_chunk, metadata in graph.stream(
+        {"messages": [{"role": "user", "content": input}]},
+        config, 
+        stream_mode= "messages"
+        ):
+        if message_chunk.content:
+            print(message_chunk.content, end="", flush=True)
+    print("\n")
+
+while True:
+    try:
+        user_input = input("User: \n")
+        if user_input.lower() in ["quit", "exit", "q"]:
+            print("Goodbye!")
+            break
+
+        run_graph(1,user_input)
+    except:
+        # fallback if input() is not available
+        user_input = "What do you know about LangGraph?"
+        print("User: " + user_input)
+        run_graph(1,user_input)
+        break
