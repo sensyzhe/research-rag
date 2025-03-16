@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from langchain_openai import ChatOpenAI
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import BaseMessage
 from typing_extensions import TypedDict
 
@@ -25,7 +24,6 @@ graph_builder = StateGraph(State)
 # tool = TavilySearchResults(max_results=2)
 tools = get_retriever_tool()
 llm = ChatOpenAI(
-    temperature=0.7, # 降低随机性以获得更稳定的回答
     model="glm-4",
     openai_api_key="e046a661e0b44ed688c4d5c9c9940ff7.LXpzycHVawKsDebj",
     openai_api_base="https://open.bigmodel.cn/api/paas/v4/"
@@ -50,21 +48,25 @@ graph_builder.add_edge("tools", "chatbot")
 graph_builder.set_entry_point("chatbot")
 memory = MemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
-
+graph.get_graph().draw_mermaid_png()
 
 
 # The config is the **second positional argument** to stream() or invoke()!
 def run_graph(thread_id,input):
     thread_id = str(thread_id)
     config = {"configurable": {"thread_id": thread_id}}
-    print("Assistant: ")
+    print("\nAssistant: ")
     for message_chunk, metadata in graph.stream(
         {"messages": [{"role": "user", "content": input}]},
         config, 
         stream_mode= "messages"
         ):
         if message_chunk.content:
-            print(message_chunk.content, end="", flush=True)
+            if message_chunk.type == 'tool':
+                print("\ntool:")
+                print(message_chunk.content, end="\nAssistant: ", flush=True)
+            else:
+                print(message_chunk.content, end="", flush=True)
     print("\n")
 
 

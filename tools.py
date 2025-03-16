@@ -4,7 +4,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma  # 更新导入
 from langchain.tools.retriever import create_retriever_tool
 import chromadb
-from dotenv import load_dotenv
 import os
 
 def get_retriever_tool():
@@ -37,7 +36,7 @@ def get_retriever_tool():
         )
     else:
         print("创建新的向量数据库...")
-        txt_files = ["data/diseases_and_symptoms.txt"]
+        txt_files = ["data/diseases_and_symptoms.txt","data/牙科儿童.txt"]
         docs = [TextLoader(file, encoding="utf-8").load() for file in txt_files]
         docs_list = [item for sublist in docs for item in sublist]
 
@@ -52,7 +51,7 @@ def get_retriever_tool():
             embedding=embedding_model,
             persist_directory=persist_directory
         )
-    print(vectorstore.similarity_search("神秘人", k=2))
+    print(vectorstore.similarity_search("牙医", k=2))
     retriever = vectorstore.as_retriever()
     retriever_tool = create_retriever_tool(
         retriever,
