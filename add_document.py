@@ -26,8 +26,9 @@ if __name__ == "__main__":
     embedding_model = HuggingFaceEmbeddings(
         model_name=model_name,
         cache_folder=cache_dir,
-        model_kwargs={'device': 'cuda'}
+        model_kwargs={'device': 'cpu'}
     )
+    
     client = chromadb.PersistentClient(path=persist_directory)
     vectorstore = Chroma(
         collection_name="rag-chroma",
@@ -35,15 +36,15 @@ if __name__ == "__main__":
         embedding_function=embedding_model
         
     )
-
+    print("开始加载文件...")
     txt_files = ["data/"+file_path]
     docs = [TextLoader(file, encoding="utf-8").load() for file in txt_files]
     docs_list = [item for sublist in docs for item in sublist]
-
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=100, chunk_overlap=50
+            chunk_size=500, chunk_overlap=100
         )
+    print("开始分割文件...")
     doc_splits = text_splitter.split_documents(docs_list)
-        
+    print("执行嵌入模型...")
         # 增量更新向量数据库
     vectorstore.add_documents(doc_splits)

@@ -6,9 +6,8 @@ from langchain.tools.retriever import create_retriever_tool
 import chromadb
 import os
 
-def get_retriever_tool():
+def get_retriever_tool(model_name= "moka-ai/m3e-base"):
     persist_directory = "./vector_db"
-    model_name = "moka-ai/m3e-base"
     cache_dir = "./model_cache"
     
     # 确保缓存目录存在
@@ -21,9 +20,6 @@ def get_retriever_tool():
         cache_folder=cache_dir,
         model_kwargs={'device': 'cpu'}
     )
-
-    
-
     
     if os.path.exists(persist_directory):
         print("加载已存在的向量数据库...")
@@ -35,29 +31,14 @@ def get_retriever_tool():
             
         )
     else:
-        print("创建新的向量数据库...")
-        txt_files = ["data/diseases_and_symptoms.txt","data/牙科儿童.txt"]
-        docs = [TextLoader(file, encoding="utf-8").load() for file in txt_files]
-        docs_list = [item for sublist in docs for item in sublist]
-
-        text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=100, chunk_overlap=50
-        )
-        doc_splits = text_splitter.split_documents(docs_list)
-        
-        vectorstore = Chroma.from_documents(
-            documents=doc_splits,
-            collection_name="rag-chroma",
-            embedding=embedding_model,
-            persist_directory=persist_directory
-        )
-    print(vectorstore.similarity_search("牙医", k=2))
+        print("请先运行add_document.py文件，创建向量数据库...")
+        return None
     retriever = vectorstore.as_retriever()
     retriever_tool = create_retriever_tool(
         retriever,
-        "信息检索工具",
-        "这是一个用于检索冷门疾病症状、牙科儿童相关信息的工具。你可以通过这个工具检索疾病和症状信息",
+        "牙科医学信息检索工具",
+        "这是一个用于包含正畸学相关知识、牙科儿童相关信息、赛德阳光机构相关信息的工具。你可以通过这个工具检索医学信息",
     )
 
     print("向量数据库加载完成")
-    return [retriever_tool]
+    return retriever_tool

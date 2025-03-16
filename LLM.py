@@ -11,6 +11,9 @@ from langgraph.prebuilt import ToolNode,tools_condition
 from dotenv import load_dotenv
 from tools import get_retriever_tool
 
+from IPython.display import Image, display
+from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
+
 load_dotenv()
 
 class State(TypedDict):
@@ -18,41 +21,24 @@ class State(TypedDict):
 
 
 
-graph_builder = StateGraph(State)
-
-
 # tool = TavilySearchResults(max_results=2)
-tools = get_retriever_tool()
-llm = ChatOpenAI(
-    model="glm-4",
-    openai_api_key="e046a661e0b44ed688c4d5c9c9940ff7.LXpzycHVawKsDebj",
-    openai_api_base="https://open.bigmodel.cn/api/paas/v4/"
-)
-llm_with_tools = llm.bind_tools(tools)
-
-
+tool = get_retriever_tool()
+tools = [tool]
 def chatbot(state: State):
+    llm = ChatOpenAI(
+        model="glm-4",
+        openai_api_key="e046a661e0b44ed688c4d5c9c9940ff7.LXpzycHVawKsDebj",
+        openai_api_base="https://open.bigmodel.cn/api/paas/v4/"
+    )
+    llm_with_tools = llm.bind_tools(tools)
     return  {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 
-graph_builder.add_node("chatbot", chatbot)
 
-tool_node = ToolNode(tools=tools)
-graph_builder.add_node("tools", tool_node)
-
-graph_builder.add_conditional_edges(
-    "chatbot",
-    tools_condition,#如果上一个message带有tool call,导向toolnode，否则导向end
-)
-graph_builder.add_edge("tools", "chatbot")
-graph_builder.set_entry_point("chatbot")
-memory = MemorySaver()
-graph = graph_builder.compile(checkpointer=memory)
-graph.get_graph().draw_mermaid_png()
 
 
 # The config is the **second positional argument** to stream() or invoke()!
-def run_graph(thread_id,input):
+def run_graph(graph,input,thread_id=1):
     thread_id = str(thread_id)
     config = {"configurable": {"thread_id": thread_id}}
     print("\nAssistant: ")
@@ -71,6 +57,29 @@ def run_graph(thread_id,input):
 
 
 if __name__ == "__main__":
+    graph_builder = StateGraph(State)
+
+    graph_builder.add_node("chatbot", chatbot)
+
+    tool_node = ToolNode(tools=tools)
+    graph_builder.add_node("tools", tool_node)
+
+    graph_builder.add_conditional_edges(
+        "chatbot",
+        tools_condition,#如果上一个message带有tool call,导向toolnode，否则导向end
+    )
+    graph_builder.add_edge("tools", "chatbot")
+    graph_builder.set_entry_point("chatbot")
+    memory = MemorySaver()
+    graph = graph_builder.compile(checkpointer=memory)
+    from IPython.display import Image, display
+
+    try:
+        display(Image(graph.get_graph().draw_mermaid_png()))
+    except Exception:
+        # This requires some extra dependencies and is optional
+        print("无法显示流程图")
+
     while True:
         try:
             user_input = input("User: \n")
@@ -78,10 +87,10 @@ if __name__ == "__main__":
                 print("Goodbye!")
                 break
 
-            run_graph(1,user_input)
+            run_graph(graph,user_input)
         except:
             # fallback if input() is not available
             user_input = "What do you know about LangGraph?"
             print("User: " + user_input)
-            run_graph(1,user_input)
+            run_graph(graph,user_input)
             break
