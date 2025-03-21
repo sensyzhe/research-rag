@@ -1,8 +1,9 @@
 from typing import Annotated
+from typing_extensions import TypedDict
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage
-from typing_extensions import TypedDict
+
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
@@ -11,19 +12,17 @@ from langgraph.prebuilt import ToolNode,tools_condition
 from dotenv import load_dotenv
 from tools import get_retriever_tool
 
-from IPython.display import Image, display
-from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
-
-load_dotenv()
+# 加载环境变量
+# load_dotenv()
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
-
-
-# tool = TavilySearchResults(max_results=2)
+# 获取检索工具
 tool = get_retriever_tool()
 tools = [tool]
+
+# 定义聊天机器人函数，处理状态并返回消息
 def chatbot(state: State):
     llm = ChatOpenAI(
         model="glm-4",
@@ -33,11 +32,7 @@ def chatbot(state: State):
     llm_with_tools = llm.bind_tools(tools)
     return  {"messages": [llm_with_tools.invoke(state["messages"])]}
 
-
-
-
-
-# The config is the **second positional argument** to stream() or invoke()!
+# 运行图形流程，处理用户输入并输出结果
 def run_graph(graph,input,thread_id=1):
     thread_id = str(thread_id)
     config = {"configurable": {"thread_id": thread_id}}
@@ -64,22 +59,18 @@ if __name__ == "__main__":
     tool_node = ToolNode(tools=tools)
     graph_builder.add_node("tools", tool_node)
 
+    # 添加条件边，根据消息是否包含工具调用决定流向
     graph_builder.add_conditional_edges(
         "chatbot",
         tools_condition,#如果上一个message带有tool call,导向toolnode，否则导向end
     )
     graph_builder.add_edge("tools", "chatbot")
     graph_builder.set_entry_point("chatbot")
+
     memory = MemorySaver()
     graph = graph_builder.compile(checkpointer=memory)
-    from IPython.display import Image, display
 
-    try:
-        display(Image(graph.get_graph().draw_mermaid_png()))
-    except Exception:
-        # This requires some extra dependencies and is optional
-        print("无法显示流程图")
-
+    # 进入主循环，处理用户输入
     while True:
         try:
             user_input = input("User: \n")
@@ -89,7 +80,7 @@ if __name__ == "__main__":
 
             run_graph(graph,user_input)
         except:
-            # fallback if input() is not available
+            # 如果 input() 不可用，使用默认问题
             user_input = "What do you know about LangGraph?"
             print("User: " + user_input)
             run_graph(graph,user_input)

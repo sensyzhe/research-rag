@@ -33,9 +33,9 @@ if __name__ == "__main__":
     vectorstore = Chroma(
         collection_name="rag-chroma",
         client=client,
-        embedding_function=embedding_model
-        
+        embedding_function=embedding_model 
     )
+    
     print("开始加载文件...")
     txt_files = ["data/"+file_path]
     docs = [TextLoader(file, encoding="utf-8").load() for file in txt_files]
