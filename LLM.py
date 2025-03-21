@@ -17,6 +17,11 @@ import os
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
+    system_prompt: str
+    #初始化时，附加系统提示
+    def __init__(self):
+        self.system_prompt = "你是一个牙科医生，请根据用户的问题给出自己的回答，不要直接返回工具返回的信息"
+        self.messages = [{"role": "system", "content": self.system_prompt}]
 
 # 获取检索工具
 tool = get_retriever_tool()
@@ -26,8 +31,8 @@ tools = [tool]
 def chatbot(state: State):
     llm = ChatOpenAI(
         model="glm-4",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-        openai_api_base=os.getenv("OPENAI_API_BASE")
+        openai_api_key='e046a661e0b44ed688c4d5c9c9940ff7.LXpzycHVawKsDebj',
+        openai_api_base='https://open.bigmodel.cn/api/paas/v4/'
     )
     llm_with_tools = llm.bind_tools(tools)
     return  {"messages": [llm_with_tools.invoke(state["messages"])]}
