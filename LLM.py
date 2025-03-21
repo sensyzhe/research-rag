@@ -11,7 +11,7 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode,tools_condition
 from dotenv import load_dotenv
 from tools import get_retriever_tool
-
+import os
 # 加载环境变量
 # load_dotenv()
 
@@ -26,8 +26,8 @@ tools = [tool]
 def chatbot(state: State):
     llm = ChatOpenAI(
         model="glm-4",
-        openai_api_key="e046a661e0b44ed688c4d5c9c9940ff7.LXpzycHVawKsDebj",
-        openai_api_base="https://open.bigmodel.cn/api/paas/v4/"
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        openai_api_base=os.getenv("OPENAI_API_BASE")
     )
     llm_with_tools = llm.bind_tools(tools)
     return  {"messages": [llm_with_tools.invoke(state["messages"])]}
