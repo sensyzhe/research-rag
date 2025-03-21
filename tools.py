@@ -9,6 +9,8 @@ import os
 def get_retriever_tool(model_name= "moka-ai/m3e-base"):
     persist_directory = "./vector_db"
     cache_dir = "./model_cache"
+    # 设置代理
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
     
     # 确保缓存目录存在
     os.makedirs(cache_dir, exist_ok=True)
@@ -18,7 +20,7 @@ def get_retriever_tool(model_name= "moka-ai/m3e-base"):
     embedding_model = HuggingFaceEmbeddings(
         model_name=model_name,
         cache_folder=cache_dir,
-        model_kwargs={'device': 'cpu'}
+        model_kwargs={'device': 'cpu',},
     )
     
     if os.path.exists(persist_directory):
@@ -32,7 +34,7 @@ def get_retriever_tool(model_name= "moka-ai/m3e-base"):
         )
     else:
         print("请先运行add_document.py文件，创建向量数据库...")
-        return None
+        raise ValueError("向量数据库不存在")
     
     retriever = vectorstore.as_retriever()
     retriever_tool = create_retriever_tool(

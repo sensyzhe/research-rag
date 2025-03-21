@@ -7,6 +7,7 @@ langchain-huggingface==0.1.2
 langgraph==0.3.11
 langgraph-checkpoint==2.0.17
 langgraph-prebuilt==0.1.2
+langchain_chroma==0.1.1
 
 # 向量数据库
 chromadb==0.6.3
