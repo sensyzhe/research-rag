@@ -17,6 +17,7 @@ if __name__ == "__main__":
     persist_directory = "./vector_db"
     model_name = "moka-ai/m3e-base"
     cache_dir = "./model_cache"
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
     # 确保缓存目录存在
     os.makedirs(cache_dir, exist_ok=True)
