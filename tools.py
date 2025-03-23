@@ -9,7 +9,7 @@ from langchain.retrievers import ParentDocumentRetriever
 from langchain.storage import LocalFileStore
 from langchain.storage._lc_store import create_kv_docstore
 
-def get_retriever(embedding_model=None, model_name= "moka-ai/m3e-base"):
+def get_retriever( model_name= "moka-ai/m3e-base",embedding_model=None):
     persist_directory = "./vector_db"
     cache_dir = "./model_cache"
     local_store_path = "./docstore"
@@ -51,13 +51,13 @@ def get_retriever(embedding_model=None, model_name= "moka-ai/m3e-base"):
     )
     return retriever
 
-def get_retriever_tool(model_name= "moka-ai/m3e-base"):
+def get_retriever_tool(model_name= "moka-ai/m3e-base",embedding_model=None):
     persist_directory = "./vector_db"
     # 设置代理
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
     
     if os.path.exists(persist_directory):
-        retriever = get_retriever(model_name=model_name)
+        retriever = get_retriever(model_name=model_name,embedding_model=embedding_model)
     else:
         print("请先运行add_document.py文件，创建向量数据库...")
         raise ValueError("向量数据库不存在")
@@ -71,8 +71,8 @@ def get_retriever_tool(model_name= "moka-ai/m3e-base"):
     print("向量数据库加载完成")
     return retriever_tool
 
-def test_retriever_tool(embedding_model=None):
-    retriever_tool = get_retriever_tool(embedding_model)
+def test_retriever_tool(model_name= "moka-ai/m3e-base",embedding_model=None):
+    retriever_tool = get_retriever_tool(model_name,embedding_model)
     while True:
         user_input = input("请输入要检索的信息：")
         if user_input.lower() in ["quit", "exit", "q"]:
