@@ -28,8 +28,8 @@ def get_retriever( model_name= "moka-ai/m3e-base",embedding_model=None):
             model_kwargs={'device': 'cpu',},
         )
         print("初始化嵌入模型完成")
-    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
-    child_splitter = RecursiveCharacterTextSplitter(chunk_size=50, chunk_overlap=10)
+    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    child_splitter = RecursiveCharacterTextSplitter(chunk_size=40, chunk_overlap=8)
 
     # Assuming `splits` is your list of documents
     client = chromadb.PersistentClient(path=persist_directory)
@@ -64,8 +64,9 @@ def get_retriever_tool(model_name= "moka-ai/m3e-base",embedding_model=None):
     
     retriever_tool = create_retriever_tool(
         retriever,
-        "牙科医学信息检索工具",
-        "这是一个用于包含正畸学相关知识、牙科儿童相关信息、赛德阳光机构相关信息的工具。你可以通过这个工具检索医学信息,请注意你应该利用工具返回的信息针对用户问题给出自己的回答，不要直接返回工具返回的信息",
+        "信息检索工具",
+        """这是一个用于检索包含正畸学、功能牙合学、儿童牙科诊疗行为管理相关信息、赛德阳光机构相关信息的工具。
+        你可以通过这个工具检索医学信息,请注意你应该利用工具返回的信息针对用户问题给出自己的回答，不要直接返回工具返回的信息""",
     )
 
     print("向量数据库加载完成")
