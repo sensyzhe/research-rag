@@ -2,9 +2,10 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from tools import get_retriever,test_retriever_tool
+from embedding_service import EmbeddingService
 import os
 import sys
-import shutil
+
 
 if __name__ == "__main__":
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
@@ -13,15 +14,8 @@ if __name__ == "__main__":
     persist_directory = "./vector_db"
     local_store_path = "./docstore"
 
-    # 初始化嵌入模型
-    print(f"初始化嵌入模型 {model_name}...")
-    embedding_model = HuggingFaceEmbeddings(
-        model_name=model_name,
-        cache_folder=cache_dir,
-        model_kwargs={'device': 'cpu'}
-    )
-
-    print("开始加载文件...")
+    embedding_service = EmbeddingService()
+    embedding_model = embedding_service.model
     retriever = get_retriever(model_name=model_name,embedding_model=embedding_model)
 
     # 从命令行获取文件路径
