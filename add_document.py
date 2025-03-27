@@ -28,8 +28,6 @@ if __name__ == "__main__":
         if not os.path.exists(file_path):
             print(f"错误：文件 {file_path} 不存在")
             sys.exit(1)
-
-    print(f"正在处理 {len(txt_files)} 个文件...")
     
     # 加载所有文件
     docs = []

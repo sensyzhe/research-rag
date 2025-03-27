@@ -55,15 +55,18 @@ def get_retriever_tool(similarity_threshold=0.85):
         
     splitter = RecursiveCharacterTextSplitter(chunk_size=150, chunk_overlap=10,
                                              separators=["。", "？", "！", "\n"])
+    
+    #一系列压缩工具
     redundant_filter = EmbeddingsRedundantFilter(embeddings=embedding_model)
     relevant_filter = EmbeddingsFilter(embeddings=embedding_model, similarity_threshold=similarity_threshold)
     pipeline_compressor = DocumentCompressorPipeline(
         transformers=[splitter, redundant_filter, relevant_filter]
     )
+
+    # 检索工具组装
     compression_retriever = ContextualCompressionRetriever(
         base_compressor=pipeline_compressor, base_retriever=retriever
     )
-    
     retriever_tool = create_retriever_tool(
         compression_retriever,
         "信息检索工具",
