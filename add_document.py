@@ -1,22 +1,18 @@
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from tools import get_retriever,test_retriever_tool
+from tools import get_retriever, test_retriever_tool
 from embedding_service import EmbeddingService
 import os
 import sys
 
 
 if __name__ == "__main__":
-    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-    model_name = "moka-ai/m3e-base"
-    cache_dir = "./model_cache"
     persist_directory = "./vector_db"
     local_store_path = "./docstore"
 
     embedding_service = EmbeddingService()
     embedding_model = embedding_service.model
-    retriever = get_retriever(model_name=model_name,embedding_model=embedding_model)
+    retriever = get_retriever()
 
     # 从命令行获取文件路径
     if len(sys.argv) < 2:
@@ -62,7 +58,7 @@ if __name__ == "__main__":
     retriever.add_documents(doc_splits)
     print("文档添加完成")
     
-    test_retriever_tool(model_name,embedding_model)
+    test_retriever_tool()
     
     #删除向量数据库
     # shutil.rmtree(persist_directory)

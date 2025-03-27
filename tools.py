@@ -13,15 +13,13 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain.retrievers import ContextualCompressionRetriever
 from embedding_service import EmbeddingService
 
-def get_retriever(model_name="moka-ai/m3e-base", embedding_model=None):
+def get_retriever():
     persist_directory = "./vector_db"
-    cache_dir = "./model_cache"
     local_store_path = "./docstore"
     
     # 使用嵌入服务
-    if embedding_model is None:
-        embedding_service = EmbeddingService()
-        embedding_model = embedding_service.model
+    embedding_service = EmbeddingService()
+    embedding_model = embedding_service.model
     
     parent_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150)
     child_splitter = RecursiveCharacterTextSplitter(chunk_size=50, chunk_overlap=10)
@@ -43,18 +41,17 @@ def get_retriever(model_name="moka-ai/m3e-base", embedding_model=None):
     )
     return retriever
 
-def get_retriever_tool(model_name="moka-ai/m3e-base", embedding_model=None, similarity_threshold=0.85):
+def get_retriever_tool(similarity_threshold=0.85):
     persist_directory = "./vector_db"
     
     if os.path.exists(persist_directory):
-        retriever = get_retriever(model_name=model_name, embedding_model=embedding_model)
+        retriever = get_retriever()
     else:
         print("请先运行add_document.py文件，创建向量数据库...")
         raise ValueError("向量数据库不存在")
     
-    if embedding_model is None:
-        embedding_service = EmbeddingService()
-        embedding_model = embedding_service.model
+    embedding_service = EmbeddingService()
+    embedding_model = embedding_service.model
         
     splitter = RecursiveCharacterTextSplitter(chunk_size=150, chunk_overlap=10,
                                              separators=["。", "？", "！", "\n"])
@@ -77,15 +74,11 @@ def get_retriever_tool(model_name="moka-ai/m3e-base", embedding_model=None, simi
     print("向量数据库加载完成")
     return retriever_tool
 
-def test_retriever_tool(model_name="moka-ai/m3e-base", embedding_model=None):
-    if embedding_model is None:
-        embedding_service = EmbeddingService()
-        embedding_model = embedding_service.model
-    
+def test_retriever_tool():
     while True:
         similarity_threshold = float(input("请输入相似度阈值："))
         user_input = input("请输入要检索的信息：")
-        retriever_tool = get_retriever_tool(model_name, embedding_model, similarity_threshold)
+        retriever_tool = get_retriever_tool(similarity_threshold)
         if user_input.lower() in ["quit", "exit", "q"]:
             print("Goodbye!")
             break
