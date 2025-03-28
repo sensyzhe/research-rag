@@ -10,7 +10,7 @@ from langgraph.prebuilt import ToolNode,tools_condition
 from tools import get_retriever_tool
 import os
 import dotenv
-
+from ragas.llms import LangchainLLMWrapper
 dotenv.load_dotenv()
 
 system_prompt = """你是一名专业的医学专家，擅长解答有关医学诊疗和疾病治疗的问题。
@@ -30,12 +30,9 @@ class State(TypedDict):
     messages: Annotated[list, add_messages]
     
 
-# 获取检索工具
-tool = get_retriever_tool()
-tools = [tool]
 
 # 定义聊天机器人函数，处理状态并返回消息
-def chatbot(state: State):
+def chatbot(state: State, tools):
     global system_prompt
     if system_prompt:
         state["messages"].insert(0, {"role": "system", "content": system_prompt})
@@ -71,11 +68,14 @@ def run_graph(graph,input,thread_id=1):
                 print(message_chunk.content, end="", flush=True)
     print("\n")
 
-
-if __name__ == "__main__":
+def build_graph(similarity_threshold=0.8):
     graph_builder = StateGraph(State)
 
-    graph_builder.add_node("chatbot", chatbot)
+    # 获取检索工具
+    tool = get_retriever_tool(similarity_threshold)
+    tools = [tool]
+    # tools = []
+    graph_builder.add_node("chatbot", lambda state: chatbot(state, tools))
 
     tool_node = ToolNode(tools=tools)
     graph_builder.add_node("tools", tool_node)
@@ -90,7 +90,11 @@ if __name__ == "__main__":
 
     memory = MemorySaver()
     graph = graph_builder.compile(checkpointer=memory)
+    return graph
 
+
+if __name__ == "__main__":
+    graph = build_graph()
     # 进入主循环，处理用户输入
     while True:
         try:

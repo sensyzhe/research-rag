@@ -43,7 +43,7 @@ def get_retriever():
     )
     return retriever
 
-def get_retriever_tool(similarity_threshold=0.85):
+def get_retriever_tool(similarity_threshold=0.8):
     
     if os.path.exists(persist_directory):
         retriever = get_retriever()
@@ -90,3 +90,4 @@ def test_retriever_tool():
 
 if __name__ == "__main__":
     test_retriever_tool()
+    # graph = build_graph()
