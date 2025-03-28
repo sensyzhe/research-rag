@@ -13,8 +13,8 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain.retrievers import ContextualCompressionRetriever
 from embedding_service import EmbeddingService
 
-persist_directory = "./vector_db"
-local_store_path = "./docstore"
+persist_directory = "./vector_db1"
+local_store_path = "./docstore1"
 
 
 def get_retriever():
