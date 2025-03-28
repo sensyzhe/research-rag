@@ -7,8 +7,6 @@ import sys
 
 
 if __name__ == "__main__":
-    persist_directory = "./vector_db"
-    local_store_path = "./docstore"
 
     embedding_service = EmbeddingService()
     embedding_model = embedding_service.model
@@ -58,6 +56,3 @@ if __name__ == "__main__":
     
     test_retriever_tool()
     
-    #删除向量数据库
-    # shutil.rmtree(persist_directory)
-    # shutil.rmtree(local_store_path) 

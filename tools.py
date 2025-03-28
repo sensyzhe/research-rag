@@ -13,9 +13,11 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain.retrievers import ContextualCompressionRetriever
 from embedding_service import EmbeddingService
 
+persist_directory = "./vector_db"
+local_store_path = "./docstore"
+
+
 def get_retriever():
-    persist_directory = "./vector_db"
-    local_store_path = "./docstore"
     
     # 使用嵌入服务
     embedding_service = EmbeddingService()
@@ -42,7 +44,6 @@ def get_retriever():
     return retriever
 
 def get_retriever_tool(similarity_threshold=0.85):
-    persist_directory = "./vector_db"
     
     if os.path.exists(persist_directory):
         retriever = get_retriever()
