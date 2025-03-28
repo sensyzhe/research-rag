@@ -19,7 +19,8 @@ class EmbeddingService:
             
             print("正在初始化嵌入模型...")
             EmbeddingService._model = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/LaBSE",
+                # model_name="sentence-transformers/LaBSE",
+                model_name="moka-ai/m3e-base",
                 cache_folder=cache_dir,
                 model_kwargs={'device': 'cpu',},
             )
