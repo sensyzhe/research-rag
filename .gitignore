@@ -48,7 +48,7 @@ Thumbs.db
 # 日志文件
 *.log
 logs/
-
+*.png
 # API密钥和敏感信息
 .env
 *.key 
