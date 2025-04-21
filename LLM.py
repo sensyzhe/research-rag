@@ -43,6 +43,9 @@ def chatbot(state: State, tools):
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         openai_api_base='https://open.bigmodel.cn/api/paas/v4/'
     )
+
+    
+
     llm_with_tools = llm.bind_tools(tools)
     return  {"messages": [llm_with_tools.invoke(state["messages"])]}
 
@@ -94,7 +97,7 @@ def build_graph(similarity_threshold=0.8):
 
 
 if __name__ == "__main__":
-    graph = build_graph()
+    graph = build_graph(similarity_threshold=0.5)
     # 进入主循环，处理用户输入
     while True:
         try:

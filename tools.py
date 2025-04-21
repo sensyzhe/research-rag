@@ -43,7 +43,7 @@ def get_retriever():
     )
     return retriever
 
-def get_retriever_tool(similarity_threshold=0.8):
+def get_retriever_tool(similarity_threshold=0.75):
     
     if os.path.exists(persist_directory):
         retriever = get_retriever()
